@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "battery.hpp"
 #include "wiring_private.h"
 #include "pins_arduino.h"
 
