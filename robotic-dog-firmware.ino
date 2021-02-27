@@ -10,15 +10,15 @@ Leg lLeg (false, 46, 48);
 
 
 void setup() {
-  Serial.begin(115200);
-  Serial.println("S");
-  int y = -80;
-  for (int x = -50; x <= 50; x += 10){
-    rLeg.fakeMoveFoot(x,y);
-  }
+    Serial.begin(115200);
+    Serial.println("S");
+    int y = -80;
+    for (int x = -50; x <= 50; x += 10) {
+        rLeg.fakeMoveFoot(x, y);
+    }
 }
 
 
 void loop() {
-  delay(100);
+    delay(100);
 }
