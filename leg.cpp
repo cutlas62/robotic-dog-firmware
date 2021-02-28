@@ -1,6 +1,24 @@
 #include "leg.h"
 
+Leg::Leg (enum legPosition pos, int fLength, int tLength, uint8_t hipN, uint8_t kneeN) {
+    footX = 0;
+    footY = 0;
+    femurLength = fLength;
+    tibiaLength = tLength;
+    legPos = pos;
+    hipServoN = hipN;
+    kneeServoN = kneeN;
+}
 
+Leg::Leg (int x, int y, enum legPosition pos, int fLength, int tLength, uint8_t hipN, uint8_t kneeN) {
+    footX = x;
+    footY = y;
+    femurLength = fLength;
+    tibiaLength = tLength;
+    legPos = pos;
+    hipServoN = hipN;
+    kneeServoN = kneeN;
+}
 
 void Leg::moveFoot (Adafruit_PWMServoDriver pwm, int x, int y) {
     double a = femurLength;
