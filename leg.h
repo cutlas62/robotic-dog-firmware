@@ -1,7 +1,11 @@
 #ifndef LEG_H
 #define LEG_H
 
+#include "Arduino.h"
 #include "stdint.h"
+#include "math.h"
+#include <Adafruit_PWMServoDriver.h>
+
 
 #define SERVOMIN    150
 #define SERVOMAX    600
@@ -36,7 +40,7 @@ class Leg {
             isRight = rightSide;
         }
 
-        void moveFoot (int xCoor, int yCoor);
+        void moveFoot (Adafruit_PWMServoDriver pwm, int x, int y);
         void fakeMoveFoot (double xCoor, double yCoor);
 };
 

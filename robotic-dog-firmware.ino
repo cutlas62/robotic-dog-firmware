@@ -8,17 +8,23 @@ Leg rLeg (true, 46, 48);
 // Test leg on the left side
 Leg lLeg (false, 46, 48);
 
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 void setup() {
     Serial.begin(115200);
     Serial.println("S");
-    int y = -80;
-    for (int x = -50; x <= 50; x += 10) {
-        rLeg.fakeMoveFoot(x, y);
-    }
+    
 }
 
 
 void loop() {
-    delay(100);
+    int y = -70;
+    for (int x = -30; x <= 60; x += 1) {
+        rLeg.moveFoot(pwm, x, y);
+        delay(8);
+    }
+    for (int x = 60; x >= -30; x -= 1) {
+        rLeg.moveFoot(pwm, x, y);
+        delay(8);
+    }
 }

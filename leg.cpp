@@ -1,9 +1,22 @@
 #include "leg.h"
-#include <math.h>
-#include <Arduino.h>
 
-void Leg::moveFoot (int xCoor, int yCoor) {
 
+
+void Leg::moveFoot (Adafruit_PWMServoDriver pwm, int x, int y) {
+    double a = femurLength;
+    double b = tibiaLength;
+    double q2 = acos((x * x + y * y - a * a - b * b) / (2 * a * b));
+    double q1 = atan2(y, x) - atan2((b * sin(q2)), (a + b * cos(q2)));
+
+    if (isnan(q1) || isnan(q2)) {
+        return;
+    }
+
+    uint16_t _q1 = constrainServoPoints(radToServoPoints(q1, -PI, 0, 217, 534));
+    uint16_t _q2 = constrainServoPoints(radToServoPoints(PI - q2, 0, PI, 217, 534));
+
+    pwm.setPWM(9, 0, _q1);
+    pwm.setPWM(8, 0, _q2);
 }
 
 // Same as moveFoot but just print the joint values
@@ -23,12 +36,12 @@ void Leg::fakeMoveFoot (double x, double y) {
     Serial.print(q2);
     Serial.println("]");
 
-    if (isnan(q1) || isnan(q2)){
+    if (isnan(q1) || isnan(q2)) {
         return;
     }
 
     uint16_t _q1 = constrainServoPoints(radToServoPoints(q1, -PI, 0, 217, 534));
-    uint16_t _q2 = constrainServoPoints(radToServoPoints(q2, -PI/2, PI/2, 217, 534));
+    uint16_t _q2 = constrainServoPoints(radToServoPoints(PI - q2, 0, PI, 217, 534));
     Serial.print("_q1 = ");
     Serial.print(_q1);
     Serial.print(", ");
