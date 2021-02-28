@@ -15,8 +15,8 @@ void Leg::moveFoot (Adafruit_PWMServoDriver pwm, int x, int y) {
     uint16_t _q1 = constrainServoPoints(radToServoPoints(q1, -PI, 0, 217, 534));
     uint16_t _q2 = constrainServoPoints(radToServoPoints(PI - q2, 0, PI, 217, 534));
 
-    pwm.setPWM(9, 0, _q1);
-    pwm.setPWM(8, 0, _q2);
+    pwm.setPWM(hipServoN, 0, _q1);
+    pwm.setPWM(kneeServoN, 0, _q2);
 }
 
 // Same as moveFoot but just print the joint values
