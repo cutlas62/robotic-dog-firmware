@@ -10,6 +10,9 @@
 #define SERVOMIN    150
 #define SERVOMAX    600
 
+#define FEMUR_LENGTH    46.0
+#define TIBIA_LENGTH    48.0
+
 enum legPosition {
     FRONT_RIGHT,
     FRONT_LEFT,
@@ -22,19 +25,21 @@ class Leg {
         // All dimensions are in mm
         int footX;
         int footY;
-        int femurLength;
-        int tibiaLength;
+        double femurLength;
+        double tibiaLength;
         enum legPosition legPos;
         uint8_t hipServoN;
         uint8_t kneeServoN;
+        int hipOffset;
+        int kneeOffset;
 
         uint16_t radToServoPoints (double radIn, double minIn, double maxIn, double minOut, double maxOut);
         uint16_t constrainServoPoints (uint16_t out);
 
     public:
 
-        Leg (enum legPosition pos, int fLength, int tLength, uint8_t hipN, uint8_t kneeN);
-        Leg (int x, int y, enum legPosition pos, int fLength, int tLength, uint8_t hipN, uint8_t kneeN);
+        Leg (enum legPosition pos, int hipOff, int kneeOff);
+        Leg (int x, int y, enum legPosition pos, int hipOff, int kneeOff);
 
         void moveFoot (Adafruit_PWMServoDriver pwm, int x, int y);
         void fakeMoveFoot (double xCoor, double yCoor);
