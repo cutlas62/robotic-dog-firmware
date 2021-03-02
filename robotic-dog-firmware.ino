@@ -11,8 +11,11 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 void setup() {
     Serial.begin(115200);
+
+    pwm.begin();
+    pwm.setPWMFreq(60);
+
     Serial.println("S");
-    
 }
 
 
