@@ -2,6 +2,9 @@
 
 const uint8_t servoNumbers [4][2] = {{9, 8}, {6, 7}, {1, 0}, {14, 15}};
 
+/*******************************************
+    Constructors
+ ******************************************/
 Leg::Leg (enum legPosition pos, int hipOff, int kneeOff) {
     footX = 0;
     footY = 0;
@@ -26,6 +29,32 @@ Leg::Leg (int x, int y, enum legPosition pos, int hipOff, int kneeOff) {
     kneeOffset = kneeOff;
 }
 
+
+
+/*******************************************
+    Setters and Getters
+ ******************************************/
+int Leg::getHipOffset (void) {
+    return hipOffset;
+}
+
+void Leg::setHipOffset(int offset) {
+    hipOffset = offset;
+}
+
+int Leg::getKneeOffset (void) {
+    return kneeOffset;
+}
+
+void Leg::setKneeOffset(int offset) {
+    kneeOffset = offset;
+}
+
+
+
+/*******************************************
+    Actuator Functions
+ ******************************************/
 void Leg::moveFoot (Adafruit_PWMServoDriver pwm, int x, int y) {
     double a = femurLength;
     double b = tibiaLength;

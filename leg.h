@@ -41,6 +41,11 @@ class Leg {
         Leg (enum legPosition pos, int hipOff, int kneeOff);
         Leg (int x, int y, enum legPosition pos, int hipOff, int kneeOff);
 
+        int getHipOffset (void);
+        void setHipOffset(int offset);
+        int getKneeOffset (void);
+        void setKneeOffset(int offset);
+
         void moveFoot (Adafruit_PWMServoDriver pwm, int x, int y);
         void fakeMoveFoot (double xCoor, double yCoor);
 };
