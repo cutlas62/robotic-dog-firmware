@@ -2,7 +2,8 @@
 #include <Adafruit_PWMServoDriver.h>
 #include "leg.h"
 
-#define INPUT_BUF_SIZE  50
+#define INPUT_BUF_SIZE      50
+#define MAX_INPUT_COMMANDS  5
 
 Leg frLeg (FRONT_RIGHT, 8, -10);
 Leg flLeg (FRONT_LEFT, 0, 0);
@@ -48,7 +49,7 @@ void checkSerialPort(void) {
 
         // Parse the incoming string
         int argc;
-        char* argv [5];
+        char* argv [MAX_INPUT_COMMANDS];
         parseInputBuf(inputBuf, &argc, argv);
 
         Serial.print("argc = ");
@@ -72,6 +73,11 @@ void parseInputBuf (char* inBuf, int* argc, char* argv []) {
             (*argc)++;
             lastTok = i + 1;
             inBuf[i] = NULL;
+
+            if (*argc == MAX_INPUT_COMMANDS){
+                // Return here to avoid buffer overflow in argv
+                return;
+            }
         }
         i++;
     }
