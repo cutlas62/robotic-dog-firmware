@@ -1,6 +1,6 @@
 #include "leg.h"
 
-const uint8_t servoNumbers [4][2] = {{9, 8}, {6, 7}, {1, 0}, {14, 15}};
+const uint8_t servoNumbers [4][2] = {{9, 8}, {14, 15}, {6, 7}, {1, 0}};
 
 /*******************************************
     Constructors
@@ -65,6 +65,12 @@ void Leg::moveFoot (Adafruit_PWMServoDriver pwm, int x, int y) {
         return;
     }
 
+    // Invert the X axis for the left side
+    if ((legPos == FRONT_LEFT) || (legPos == REAR_LEFT)){
+        q1 = -PI - q1;
+        q2 = PI - q2;
+    }
+    
     uint16_t _q1 = constrainServoPoints(radToServoPoints(q1, -PI, 0, 217, 534));
     uint16_t _q2 = constrainServoPoints(radToServoPoints(PI - q2, 0, PI, 217, 534));
 
