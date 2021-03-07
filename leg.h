@@ -24,23 +24,29 @@ enum legPosition {
 class Leg {
     private:
         // All dimensions are in mm
-        int footX;
-        int footY;
-        double femurLength;
-        double tibiaLength;
+        double footX;
+        double footY;
         enum legPosition legPos;
         uint8_t hipServoN;
         uint8_t kneeServoN;
         int hipOffset;
         int kneeOffset;
 
+        // Constants to improve inverse kinematics computation time
+        double q2_den;
+        double femur_l_sq;
+        double tibia_l_sq;
+        double diff_femur_tibia;
+        double femur_t_tibia;
+
+        // Helper functions
         uint16_t radToServoPoints (double radIn, double minIn, double maxIn, double minOut, double maxOut);
         uint16_t constrainServoPoints (uint16_t out);
 
     public:
 
         Leg (enum legPosition pos, int hipOff, int kneeOff);
-        Leg (int x, int y, enum legPosition pos, int hipOff, int kneeOff);
+        Leg (double x, double y, enum legPosition pos, int hipOff, int kneeOff);
 
         int getHipOffset (void);
         void setHipOffset(int offset);

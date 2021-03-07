@@ -1,5 +1,7 @@
 #include "leg.h"
 
+
+
 const uint8_t servoNumbers [4][2] = {{9, 8}, {14, 15}, {6, 7}, {1, 0}};
 
 
@@ -9,20 +11,21 @@ const uint8_t servoNumbers [4][2] = {{9, 8}, {14, 15}, {6, 7}, {1, 0}};
 Leg::Leg (enum legPosition pos, int hipOff, int kneeOff) {
     footX = 0;
     footY = 0;
-    femurLength = FEMUR_LENGTH;
-    tibiaLength = TIBIA_LENGTH;
     legPos = pos;
     hipServoN = servoNumbers[pos][0];
     kneeServoN = servoNumbers[pos][1];
     hipOffset = hipOff;
     kneeOffset = kneeOff;
+
+    q2_den = 2 * FEMUR_LENGTH * TIBIA_LENGTH;
+    femur_l_sq = FEMUR_LENGTH * FEMUR_LENGTH;
+    tibia_l_sq = TIBIA_LENGTH * TIBIA_LENGTH;
+    diff_femur_tibia = femur_l_sq + tibia_l_sq;
 }
 
-Leg::Leg (int x, int y, enum legPosition pos, int hipOff, int kneeOff) {
+Leg::Leg (double x, double y, enum legPosition pos, int hipOff, int kneeOff) {
     footX = x;
     footY = y;
-    femurLength = FEMUR_LENGTH;
-    tibiaLength = TIBIA_LENGTH;
     legPos = pos;
     hipServoN = servoNumbers[pos][0];
     kneeServoN = servoNumbers[pos][1];
@@ -57,10 +60,8 @@ void Leg::setKneeOffset(int offset) {
     Actuator Functions
  ******************************************/
 void Leg::moveFoot (Adafruit_PWMServoDriver *pwm, double x, double y) {
-    double a = femurLength;
-    double b = tibiaLength;
-    double q2 = acos((x * x + y * y - a * a - b * b) / (2 * a * b));
-    double q1 = atan2(y, x) - atan2((b * sin(q2)), (a + b * cos(q2)));
+    double q2 = acos((x*x + y*y - diff_femur_tibia) / q2_den);
+    double q1 = atan2(y, x) - atan2((TIBIA_LENGTH * sin(q2)), (FEMUR_LENGTH + TIBIA_LENGTH * cos(q2)));
 
     if (isnan(q1) || isnan(q2)) {
         return;

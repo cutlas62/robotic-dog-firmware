@@ -29,26 +29,35 @@ void setup() {
 void loop() {
 
     checkSerialPort();
-    int x = 0;
+    double x = 0;
+    double y = 0;
+    unsigned long start_t = 0;
+    unsigned long end_t = 0;
     if (shouldMove) {
-        for (int y = -30; y >= -90; y--) {
+        for (y = -30; y >= -90; y -= 0.5) {
+            start_t = micros();
             frLeg.moveFoot(&pwm, x, y);
             flLeg.moveFoot(&pwm, x, y);
             rrLeg.moveFoot(&pwm, x, y);
             rlLeg.moveFoot(&pwm, x, y);
-            delay(8);
+            end_t = micros();
+            Serial.println(end_t - start_t);
+            //delay(8);
         }
     }
 
     checkSerialPort();
 
     if (shouldMove) {
-        for (int y = -90; y <= -30; y++) {
+        for (y = -90; y <= -30; y += 0.5) {
+            start_t = micros();
             frLeg.moveFoot(&pwm, x, y);
             flLeg.moveFoot(&pwm, x, y);
             rrLeg.moveFoot(&pwm, x, y);
             rlLeg.moveFoot(&pwm, x, y);
-            delay(8);
+            end_t = micros();
+            Serial.println(end_t - start_t);
+            //delay(8);
         }
     }
 
