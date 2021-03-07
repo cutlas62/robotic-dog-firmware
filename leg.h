@@ -7,8 +7,9 @@
 #include <Adafruit_PWMServoDriver.h>
 
 
-#define SERVOMIN    150
-#define SERVOMAX    600
+#define SERVO_MIN   150
+#define SERVO_MAX   600
+#define SERVO_HOME  ((SERVO_MIN + SERVO_MAX) / 2)
 
 #define FEMUR_LENGTH    46.0
 #define TIBIA_LENGTH    48.0
@@ -46,8 +47,10 @@ class Leg {
         int getKneeOffset (void);
         void setKneeOffset(int offset);
 
-        void moveFoot (Adafruit_PWMServoDriver pwm, int x, int y);
-        void fakeMoveFoot (double xCoor, double yCoor);
+        void moveFoot (Adafruit_PWMServoDriver *pwm, double x, double y);
+        //void fakeMoveFoot (double xCoor, double yCoor);
+
+        void homeLeg (Adafruit_PWMServoDriver *pwm);
 };
 
 #endif

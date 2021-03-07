@@ -2,6 +2,7 @@
 
 const uint8_t servoNumbers [4][2] = {{9, 8}, {14, 15}, {6, 7}, {1, 0}};
 
+
 /*******************************************
     Constructors
  ******************************************/
@@ -55,7 +56,7 @@ void Leg::setKneeOffset(int offset) {
 /*******************************************
     Actuator Functions
  ******************************************/
-void Leg::moveFoot (Adafruit_PWMServoDriver pwm, int x, int y) {
+void Leg::moveFoot (Adafruit_PWMServoDriver *pwm, double x, double y) {
     double a = femurLength;
     double b = tibiaLength;
     double q2 = acos((x * x + y * y - a * a - b * b) / (2 * a * b));
@@ -66,23 +67,28 @@ void Leg::moveFoot (Adafruit_PWMServoDriver pwm, int x, int y) {
     }
 
     // Invert the X axis for the left side
-    if ((legPos == FRONT_LEFT) || (legPos == REAR_LEFT)){
+    if ((legPos == FRONT_LEFT) || (legPos == REAR_LEFT)) {
         q1 = -PI - q1;
         q2 = PI - q2;
     }
-    
-    uint16_t _q1 = constrainServoPoints(radToServoPoints(q1, -PI, 0, 217, 534));
-    uint16_t _q2 = constrainServoPoints(radToServoPoints(PI - q2, 0, PI, 217, 534));
 
-    pwm.setPWM(hipServoN, 0, _q1 + hipOffset);
-    pwm.setPWM(kneeServoN, 0, _q2 + kneeOffset);
+    uint16_t _q1 = radToServoPoints(q1, -PI, 0, 217, 534);
+    uint16_t _q2 = radToServoPoints(PI - q2, 0, PI, 217, 534);
+
+    _q1 = constrainServoPoints(_q1 + hipOffset);
+    _q2 = constrainServoPoints(_q2 + kneeOffset);
+
+    pwm->setPWM(hipServoN, 0, _q1);
+    pwm->setPWM(kneeServoN, 0, _q2);
 
     footX = x;
     footY = y;
+
 }
 
 // Same as moveFoot but just print the joint values
 // instead of moving the feet, for testing purposes
+/*
 void Leg::fakeMoveFoot (double x, double y) {
     double a = femurLength;
     double b = tibiaLength;
@@ -114,17 +120,23 @@ void Leg::fakeMoveFoot (double x, double y) {
     footX = x;
     footY = y;
 }
+*/
+
+void Leg::homeLeg (Adafruit_PWMServoDriver *pwm) {
+    pwm->setPWM(hipServoN, 0, SERVO_HOME + hipOffset);
+    pwm->setPWM(kneeServoN, 0, SERVO_HOME + kneeOffset);
+}
 
 uint16_t Leg::radToServoPoints (double radIn, double minIn, double maxIn, double minOut, double maxOut) {
     return ((radIn - minIn) * (maxOut - minOut) / (maxIn - minIn) + minOut);
 }
 
 uint16_t Leg::constrainServoPoints (uint16_t out) {
-    if (out < SERVOMIN) {
-        return SERVOMIN;
+    if (out < SERVO_MIN) {
+        return SERVO_MIN;
     }
-    if (out > SERVOMAX) {
-        return SERVOMAX;
+    if (out > SERVO_MAX) {
+        return SERVO_MAX;
     }
     return out;
 }

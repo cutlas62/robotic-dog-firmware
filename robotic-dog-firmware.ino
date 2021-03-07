@@ -5,10 +5,12 @@
 #define INPUT_BUF_SIZE      50
 #define MAX_INPUT_COMMANDS  5
 
-Leg frLeg (FRONT_RIGHT, 8, -10);
-Leg flLeg (FRONT_LEFT, 0, 0);
-Leg rrLeg (REAR_RIGHT, 0, 0);
-Leg rlLeg (REAR_LEFT, 0, 0);
+Leg frLeg (FRONT_RIGHT, 8, -6);
+Leg flLeg (FRONT_LEFT, 10, -10);
+Leg rrLeg (REAR_RIGHT, -8, -13);
+Leg rlLeg (REAR_LEFT, 3, -8);
+
+bool shouldMove;
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
@@ -19,6 +21,7 @@ void setup() {
     pwm.begin();
     pwm.setPWMFreq(60);
 
+    shouldMove = false;
     Serial.println("Starting now");
 }
 
@@ -26,20 +29,29 @@ void setup() {
 void loop() {
 
     checkSerialPort();
-
-    int y = -70;
-    for (int x = -30; x <= 60; x += 1) {
-        frLeg.moveFoot(pwm, x, y);
-        flLeg.moveFoot(pwm, x, y);
-        delay(8);
-    }
-    for (int x = 60; x >= -30; x -= 1) {
-        frLeg.moveFoot(pwm, x, y);
-        flLeg.moveFoot(pwm, x, y);
-        delay(8);
+    int x = 0;
+    if (shouldMove) {
+        for (int y = -30; y >= -90; y--) {
+            frLeg.moveFoot(&pwm, x, y);
+            flLeg.moveFoot(&pwm, x, y);
+            rrLeg.moveFoot(&pwm, x, y);
+            rlLeg.moveFoot(&pwm, x, y);
+            delay(8);
+        }
     }
 
-    //delay(100);
+    checkSerialPort();
+
+    if (shouldMove) {
+        for (int y = -90; y <= -30; y++) {
+            frLeg.moveFoot(&pwm, x, y);
+            flLeg.moveFoot(&pwm, x, y);
+            rrLeg.moveFoot(&pwm, x, y);
+            rlLeg.moveFoot(&pwm, x, y);
+            delay(8);
+        }
+    }
+
 }
 
 void checkSerialPort(void) {
@@ -88,12 +100,12 @@ void parseInputBuf (char* inBuf, int* argc, char* argv []) {
 
 int decodeInputCmd (int argc, char* argv []) {
     /*
-    for (int i = 0; i < argc; i++){
+        for (int i = 0; i < argc; i++){
         Serial.print("argv[");
         Serial.print(i);
         Serial.print("] -> ");
         Serial.println(argv[i]);
-    }
+        }
     */
     if (argc < 1) {
         return -1;
@@ -103,6 +115,13 @@ int decodeInputCmd (int argc, char* argv []) {
 
     if (strcmp(argv[0], "help") == 0) {
         printHelp();
+    } else if (strcmp(argv[0], "move") == 0) {
+        shouldMove = true;;
+    } else if (strcmp(argv[0], "stop") == 0) {
+        shouldMove = false;
+    } else if (strcmp(argv[0], "home") == 0) {
+        shouldMove = false;
+        homeAllServos();
     } else if (strcmp(argv[0], "fr") == 0) {
         targetLeg = &frLeg;
     } else if (strcmp(argv[0], "fl") == 0) {
@@ -149,6 +168,14 @@ int decodeInputCmd (int argc, char* argv []) {
     } else {
         return -7;
     }
+}
+
+void homeAllServos() {
+    Serial.println(F("Homing all the servos..."));
+    frLeg.homeLeg(&pwm);
+    flLeg.homeLeg(&pwm);
+    rrLeg.homeLeg(&pwm);
+    rlLeg.homeLeg(&pwm);
 }
 
 void printHelp (void) {
