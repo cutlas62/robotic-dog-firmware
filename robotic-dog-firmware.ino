@@ -125,9 +125,11 @@ int decodeInputCmd (int argc, char* argv []) {
     if (strcmp(argv[0], "help") == 0) {
         printHelp();
     } else if (strcmp(argv[0], "move") == 0) {
-        shouldMove = true;;
+        shouldMove = true;
+        Serial.println("Moving");
     } else if (strcmp(argv[0], "stop") == 0) {
         shouldMove = false;
+        Serial.println("Stopping");
     } else if (strcmp(argv[0], "home") == 0) {
         shouldMove = false;
         homeAllServos();
