@@ -10,10 +10,22 @@ Leg flLeg (FRONT_LEFT, 10, -10);
 Leg rrLeg (REAR_RIGHT, -8, -13);
 Leg rlLeg (REAR_LEFT, 3, -8);
 
-bool shouldMove;
-
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
+/****************************************  
+ *  Function prototypes
+ ****************************************/
+void moveServos (void);
+void moveFoot (void);
+void squareTrajectory (void);
+void bezierTrajectory (void);
+void crawlGait (void);
+void walkGait (void);
+void runGait (void);
+
+/****************************************  
+ *  Setup
+ ****************************************/
 void setup() {
     Serial.begin(115200);
     Serial.setTimeout(10);
@@ -21,48 +33,53 @@ void setup() {
     pwm.begin();
     pwm.setPWMFreq(60);
 
-    shouldMove = false;
-    Serial.println("Starting now");
+    Serial.println(F("Starting now"));
 }
 
-
+/****************************************  
+ *  Loop
+ ****************************************/
 void loop() {
 
     checkSerialPort();
-    double x = 0;
-    double y = 0;
-    unsigned long start_t = 0;
-    unsigned long end_t = 0;
-    if (shouldMove) {
-        for (y = -30; y >= -90; y -= 0.5) {
-            start_t = micros();
-            frLeg.moveFoot(&pwm, x, y);
-            flLeg.moveFoot(&pwm, x, y);
-            rrLeg.moveFoot(&pwm, x, y);
-            rlLeg.moveFoot(&pwm, x, y);
-            end_t = micros();
-            Serial.println(end_t - start_t);
-            //delay(8);
-        }
-    }
-
-    checkSerialPort();
-
-    if (shouldMove) {
-        for (y = -90; y <= -30; y += 0.5) {
-            start_t = micros();
-            frLeg.moveFoot(&pwm, x, y);
-            flLeg.moveFoot(&pwm, x, y);
-            rrLeg.moveFoot(&pwm, x, y);
-            rlLeg.moveFoot(&pwm, x, y);
-            end_t = micros();
-            Serial.println(end_t - start_t);
-            //delay(8);
-        }
-    }
+    
 
 }
+/****************************************  
+ *  Action functions
+ ****************************************/
+void moveServos (void){
+    
+}
 
+void moveFoot (void){
+    
+}
+
+void squareTrajectory (void){
+    
+}
+
+void bezierTrajectory (void){
+    
+}
+
+void crawlGait (void){
+    
+}
+
+void walkGait (void){
+    
+}
+
+void runGait (void){
+    
+}
+
+
+/****************************************  
+ *  Serial Port utilities
+ ****************************************/
 void checkSerialPort(void) {
     if (Serial.available() > 0) {
         // Read the incoming string and null-terminate it
@@ -108,77 +125,11 @@ void parseInputBuf (char* inBuf, int* argc, char* argv []) {
 }
 
 int decodeInputCmd (int argc, char* argv []) {
-    /*
-        for (int i = 0; i < argc; i++){
-        Serial.print("argv[");
-        Serial.print(i);
-        Serial.print("] -> ");
-        Serial.println(argv[i]);
-        }
-    */
     if (argc < 1) {
         return -1;
     }
 
-    Leg *targetLeg;
-
-    if (strcmp(argv[0], "help") == 0) {
-        printHelp();
-    } else if (strcmp(argv[0], "move") == 0) {
-        shouldMove = true;
-        Serial.println("Moving");
-    } else if (strcmp(argv[0], "stop") == 0) {
-        shouldMove = false;
-        Serial.println("Stopping");
-    } else if (strcmp(argv[0], "home") == 0) {
-        shouldMove = false;
-        homeAllServos();
-    } else if (strcmp(argv[0], "fr") == 0) {
-        targetLeg = &frLeg;
-    } else if (strcmp(argv[0], "fl") == 0) {
-        targetLeg = &flLeg;
-    } else if (strcmp(argv[0], "rr") == 0) {
-        targetLeg = &rrLeg;
-    } else if (strcmp(argv[0], "rl") == 0) {
-        targetLeg = &rlLeg;
-    } else {
-        return -2;
-    }
-
-    if (strcmp(argv[1], "get") == 0) {
-        // Check that there are at least 1 more argument
-        if (argc < 3) {
-            return -3;
-        }
-        if (strcmp(argv[2], "kneeOffset") == 0) {
-            Serial.println(targetLeg->getKneeOffset());
-        } else if (strcmp(argv[2], "hipOffset") == 0) {
-            Serial.println(targetLeg->getHipOffset());
-        } else {
-            return -5;
-        }
-
-    } else if (strcmp(argv[1], "set") == 0) {
-        // Check that there are at least 2 more arguments
-        if (argc < 4) {
-            return -4;
-        }
-
-        // Get the target value
-        int targetVal = atoi(argv[3]);
-
-        if (strcmp(argv[2], "kneeOffset") == 0) {
-            targetLeg->setKneeOffset(targetVal);
-            Serial.println("Ok");
-        } else if (strcmp(argv[2], "hipOffset") == 0) {
-            targetLeg->setHipOffset(targetVal);
-            Serial.println("Ok");
-        } else {
-            return -6;
-        }
-    } else {
-        return -7;
-    }
+    
 }
 
 void homeAllServos() {
@@ -190,5 +141,5 @@ void homeAllServos() {
 }
 
 void printHelp (void) {
-    Serial.println("WIP");
+    Serial.println(F("WIP"));
 }
