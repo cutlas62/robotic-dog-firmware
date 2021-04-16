@@ -12,25 +12,26 @@ Leg rlLeg (REAR_LEFT, 3, -8);
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
-/****************************************  
- *  Function prototypes
+/****************************************
+    Function prototypes
  ****************************************/
-void moveServos (void);
-void moveFoot (void);
-void squareTrajectory (void);
-void bezierTrajectory (void);
-void crawlGait (void);
-void walkGait (void);
-void runGait (void);
+void moveServos (void);         // TBD
+void moveFoot (void);           // TBD
+void squareTrajectory (void);   // TBD
+void bezierTrajectory (void);   // TBD
+void crawlGait (void);          // TBD
+void walkGait (void);           // TBD
+void runGait (void);            // TBD
+
 
 /****************************************
- *  Commands
+    Commands
  ****************************************/
 typedef struct Cmd {
     char cmd[2];
     void (*funcptr)(void);
 };
-Cmd cmdMatrix []{
+Cmd cmdMatrix [] {
     {"1\0", moveServos},
     {"2\0", moveFoot},
     {"3\0", squareTrajectory},
@@ -40,10 +41,11 @@ Cmd cmdMatrix []{
     {"7\0", runGait},
 };
 
-uint8_t nCmd = sizeof(cmdMatrix)/sizeof(Cmd);
+uint8_t nCmd = sizeof(cmdMatrix) / sizeof(Cmd);
 
-/****************************************  
- *  Setup
+
+/****************************************
+    Setup
  ****************************************/
 void setup() {
     Serial.begin(115200);
@@ -55,54 +57,99 @@ void setup() {
     Serial.println(F("Starting now"));
 }
 
-/****************************************  
- *  Loop
+
+/****************************************
+    Loop
  ****************************************/
 void loop() {
     checkSerialPort();
 }
 
-/****************************************  
- *  Action functions
+
+/****************************************
+    Action functions
  ****************************************/
- // TBD
-void moveServos (void){
+void moveServos (void) {
     Serial.println("moveServos");
+
+    uint16_t dc;
+    uint16_t servo_min = 300;
+    uint16_t servo_max = 500;
+    for (uint8_t i = 0; i < 2; i++) {
+        // Move the hip
+        for (dc = SERVO_HOME; dc < servo_max; dc++) {
+            pwm.setPWM(9, 0, dc);
+            delay(5);
+        }
+        for (dc = servo_max; dc > servo_min; dc--) {
+            pwm.setPWM(9, 0, dc);
+            delay(5);
+        }
+        for (dc = servo_min; dc <= SERVO_HOME; dc++) {
+            pwm.setPWM(9, 0, dc);
+            delay(5);
+        }
+
+        // Move the knee
+        for (dc = SERVO_HOME; dc < servo_max; dc++) {
+            pwm.setPWM(8, 0, dc);
+            delay(5);
+        }
+        for (dc = servo_max; dc > servo_min; dc--) {
+            pwm.setPWM(8, 0, dc);
+            delay(5);
+        }
+        for (dc = servo_min; dc <= SERVO_HOME; dc++) {
+            pwm.setPWM(8, 0, dc);
+            delay(5);
+        }
+
+        // Move both at the same time
+        for (dc = SERVO_HOME; dc < (servo_max - 50); dc++) {
+            pwm.setPWM(8, 0, ((servo_max - 50) - dc) + servo_min);
+            pwm.setPWM(9, 0, dc);
+            delay(5);
+        }
+        for (dc = (servo_max - 50); dc > servo_min; dc--) {
+            pwm.setPWM(8, 0, ((servo_max - 50) - dc) + servo_min);
+            pwm.setPWM(9, 0, dc);
+            delay(5);
+        }
+        for (dc = servo_min; dc <= SERVO_HOME; dc++) {
+            pwm.setPWM(8, 0, ((servo_max - 50) - dc) + servo_min);
+            pwm.setPWM(9, 0, dc);
+            delay(5);
+        }
+    }
 }
 
-// TBD
-void moveFoot (void){
+void moveFoot (void) {
     Serial.println("moveFoot");
 }
 
-// TBD
-void squareTrajectory (void){
+void squareTrajectory (void) {
     Serial.println("squareTrajectory");
 }
 
-// TBD
-void bezierTrajectory (void){
+void bezierTrajectory (void) {
     Serial.println("bezierTrajectory");
 }
 
-// TBD
-void crawlGait (void){
+void crawlGait (void) {
     Serial.println("crawlGait");
 }
 
-// TBD
-void walkGait (void){
+void walkGait (void) {
     Serial.println("walkGait");
 }
 
-// TBD
-void runGait (void){
+void runGait (void) {
     Serial.println("runGait");
 }
 
 
-/****************************************  
- *  Serial Port utilities
+/****************************************
+    Serial Port utilities
  ****************************************/
 void checkSerialPort(void) {
     if (Serial.available() > 0) {
@@ -151,11 +198,18 @@ int decodeInputCmd (int argc, char* argv []) {
     if (argc < 1) {
         return -1;
     }
-    
-    for (int i = 0; i < nCmd; i++){
-        if (strcmp(argv[0], cmdMatrix[i].cmd) == 0){
+
+    Serial.print(argv[0]);
+    Serial.print(" -> ");
+    uint8_t i;
+    for (i = 0; i < nCmd; i++) {
+        if (strcmp(argv[0], cmdMatrix[i].cmd) == 0) {
             (cmdMatrix[i].funcptr)();
+            break;
         }
+    }
+    if (i == nCmd) {
+        Serial.println("Command not found");
     }
 }
 
