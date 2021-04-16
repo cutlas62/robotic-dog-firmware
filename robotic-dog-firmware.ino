@@ -32,8 +32,15 @@ typedef struct Cmd {
 };
 Cmd cmdMatrix []{
     {"1\0", moveServos},
-    {"2\0", moveFoot}
+    {"2\0", moveFoot},
+    {"3\0", squareTrajectory},
+    {"4\0", bezierTrajectory},
+    {"5\0", crawlGait},
+    {"6\0", walkGait},
+    {"7\0", runGait},
 };
+
+uint8_t nCmd = sizeof(cmdMatrix)/sizeof(Cmd);
 
 /****************************************  
  *  Setup
@@ -58,32 +65,39 @@ void loop() {
 /****************************************  
  *  Action functions
  ****************************************/
+ // TBD
 void moveServos (void){
     Serial.println("moveServos");
 }
 
+// TBD
 void moveFoot (void){
     Serial.println("moveFoot");
 }
 
+// TBD
 void squareTrajectory (void){
-    
+    Serial.println("squareTrajectory");
 }
 
+// TBD
 void bezierTrajectory (void){
-    
+    Serial.println("bezierTrajectory");
 }
 
+// TBD
 void crawlGait (void){
-    
+    Serial.println("crawlGait");
 }
 
+// TBD
 void walkGait (void){
-    
+    Serial.println("walkGait");
 }
 
+// TBD
 void runGait (void){
-    
+    Serial.println("runGait");
 }
 
 
@@ -138,7 +152,7 @@ int decodeInputCmd (int argc, char* argv []) {
         return -1;
     }
     
-    for (int i = 0; i < 2; i++){
+    for (int i = 0; i < nCmd; i++){
         if (strcmp(argv[0], cmdMatrix[i].cmd) == 0){
             (cmdMatrix[i].funcptr)();
         }
