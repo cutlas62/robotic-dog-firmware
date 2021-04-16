@@ -23,6 +23,18 @@ void crawlGait (void);
 void walkGait (void);
 void runGait (void);
 
+/****************************************
+ *  Commands
+ ****************************************/
+typedef struct Cmd {
+    char cmd[2];
+    void (*funcptr)(void);
+};
+Cmd cmdMatrix []{
+    {"1\0", moveServos},
+    {"2\0", moveFoot}
+};
+
 /****************************************  
  *  Setup
  ****************************************/
@@ -40,20 +52,18 @@ void setup() {
  *  Loop
  ****************************************/
 void loop() {
-
     checkSerialPort();
-    
-
 }
+
 /****************************************  
  *  Action functions
  ****************************************/
 void moveServos (void){
-    
+    Serial.println("moveServos");
 }
 
 void moveFoot (void){
-    
+    Serial.println("moveFoot");
 }
 
 void squareTrajectory (void){
@@ -117,19 +127,22 @@ void parseInputBuf (char* inBuf, int* argc, char* argv []) {
     }
 
     // Check that the input wasn't empty
-    if (i > 1) {
+    if (i > 0) {
         argv[*argc] = &inBuf[lastTok];
         (*argc)++;
     }
-
 }
 
 int decodeInputCmd (int argc, char* argv []) {
     if (argc < 1) {
         return -1;
     }
-
     
+    for (int i = 0; i < 2; i++){
+        if (strcmp(argv[0], cmdMatrix[i].cmd) == 0){
+            (cmdMatrix[i].funcptr)();
+        }
+    }
 }
 
 void homeAllServos() {
