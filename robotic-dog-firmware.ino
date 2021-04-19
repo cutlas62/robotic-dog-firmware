@@ -195,12 +195,6 @@ void squareTrajectory (void) {
     for (uint8_t i = 0; i < 9; i++) {
         double targetX = points[i][0];
         double targetY = points[i][1];
-        /*
-            Serial.print("Target x = ");
-            Serial.println(targetX);
-            Serial.print("Target y = ");
-            Serial.println(targetY);
-        */
 
         while (x != targetX || y != targetY) {
             // Update x
@@ -219,11 +213,6 @@ void squareTrajectory (void) {
 
             // Move foot
             frLeg.moveFoot(&pwm, x, y);
-            /*
-                Serial.print(x);
-                Serial.print(", ");
-                Serial.println(y);
-            */
             delay(20);
         }
 
