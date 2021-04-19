@@ -131,38 +131,45 @@ void moveFoot (void) {
     double x;
     double y;
 
-    for (uint8_t i = 0; i < 2; i++) {
-        // Horizontal movement
-        y = -60;
-        for (x = 20; x <= 60; x++) {
-            frLeg.moveFoot(&pwm, x, y);
-            delay(20);
-        }
-        for (x = 60; x >= 0; x--) {
-            frLeg.moveFoot(&pwm, x, y);
-            delay(20);
-        }
-        for (x = 0; x <= 20; x++) {
-            frLeg.moveFoot(&pwm, x, y);
-            delay(20);
-        }
+    double points [9][2] = {
+        {20, -60},
+        {60, -60},
+        {0, -60},
+        {20, -60},
+        {20, -85},
+        {20, -25},
+        {20, -85},
+        {20, -60},
+        {TIBIA_LENGTH, -FEMUR_LENGTH}
+    };
 
-        // Vertical movement
-        x = 20;
-        for (y = -60; y >= -85; y--) {
-            frLeg.moveFoot(&pwm, x, y);
-            delay(20);
-        }
-        for (y = -85; y <= -25; y++) {
-            frLeg.moveFoot(&pwm, x, y);
-            delay(20);
-        }
-        for (y = -25; y >= -60; y--) {
+    x = TIBIA_LENGTH;
+    y = -FEMUR_LENGTH;
+
+    for (uint8_t i = 0; i < 9; i++) {
+        double targetX = points[i][0];
+        double targetY = points[i][1];
+
+        while (x != targetX || y != targetY) {
+            // Update x
+            if (x > targetX) {
+                x--;
+            } else if (x < targetX) {
+                x++;
+            }
+
+            // Update y
+            if (y > targetY) {
+                y--;
+            } else if (y < targetY) {
+                y++;
+            }
+
+            // Move foot
             frLeg.moveFoot(&pwm, x, y);
             delay(20);
         }
     }
-    frLeg.homeLeg(&pwm);
 }
 
 void squareTrajectory (void) {
