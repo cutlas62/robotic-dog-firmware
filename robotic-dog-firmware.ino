@@ -15,7 +15,7 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 /****************************************
     Function prototypes
  ****************************************/
-void moveServos (void);         // TBD
+void moveServos (void);
 void moveFoot (void);           // TBD
 void squareTrajectory (void);   // TBD
 void bezierTrajectory (void);   // TBD
@@ -23,12 +23,13 @@ void crawlGait (void);          // TBD
 void walkGait (void);           // TBD
 void runGait (void);            // TBD
 
+void printHelp (void);
 
 /****************************************
     Commands
  ****************************************/
 typedef struct Cmd {
-    char cmd[2];
+    char cmd[5];
     void (*funcptr)(void);
 };
 Cmd cmdMatrix [] {
@@ -39,6 +40,7 @@ Cmd cmdMatrix [] {
     {"5\0", crawlGait},
     {"6\0", walkGait},
     {"7\0", runGait},
+    {"help\0", printHelp},
 };
 
 uint8_t nCmd = sizeof(cmdMatrix) / sizeof(Cmd);
@@ -55,6 +57,7 @@ void setup() {
     pwm.setPWMFreq(60);
 
     Serial.println(F("Starting now"));
+    printHelp();
 }
 
 
@@ -222,5 +225,14 @@ void homeAllServos() {
 }
 
 void printHelp (void) {
-    Serial.println(F("WIP"));
+    Serial.println(F("******************"));
+    Serial.println(F("*  1 - moveServos"));
+    Serial.println(F("*  2 - moveFoot"));
+    Serial.println(F("*  3 - squareTrajectory"));
+    Serial.println(F("*  4 - bezierTrajectory"));
+    Serial.println(F("*  5 - crawlGait"));
+    Serial.println(F("*  6 - walkGait"));
+    Serial.println(F("*  7 - runGait"));
+    Serial.println(F("******************"));
+
 }
