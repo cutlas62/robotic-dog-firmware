@@ -73,7 +73,7 @@ void loop() {
     Action functions
  ****************************************/
 void moveServos (void) {
-    Serial.println("moveServos");
+    Serial.println(F("moveServos"));
 
     uint16_t dc;
     uint16_t servo_min = 300;
@@ -127,7 +127,7 @@ void moveServos (void) {
 }
 
 void moveFoot (void) {
-    Serial.println("moveFoot");
+    Serial.println(F("moveFoot"));
     double x;
     double y;
 
@@ -173,7 +173,7 @@ void moveFoot (void) {
 }
 
 void squareTrajectory (void) {
-    Serial.println("squareTrajectory");
+    Serial.println(F("squareTrajectory"));
     double x;
     double y;
 
@@ -233,19 +233,19 @@ void squareTrajectory (void) {
 }
 
 void bezierTrajectory (void) {
-    Serial.println("bezierTrajectory");
+    Serial.println(F("bezierTrajectory"));
 }
 
 void crawlGait (void) {
-    Serial.println("crawlGait");
+    Serial.println(F("crawlGait"));
 }
 
 void walkGait (void) {
-    Serial.println("walkGait");
+    Serial.println(F("walkGait"));
 }
 
 void runGait (void) {
-    Serial.println("runGait");
+    Serial.println(F("runGait"));
 }
 
 
@@ -310,7 +310,7 @@ int decodeInputCmd (int argc, char* argv []) {
         }
     }
     if (i == nCmd) {
-        Serial.println("Command not found");
+        Serial.println(F("Command not found"));
     }
 }
 
