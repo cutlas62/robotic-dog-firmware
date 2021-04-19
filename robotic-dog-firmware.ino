@@ -16,8 +16,8 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
     Function prototypes
  ****************************************/
 void moveServos (void);
-void moveFoot (void);           // TBD
-void squareTrajectory (void);   // TBD
+void moveFoot (void);
+void squareTrajectory (void);
 void bezierTrajectory (void);   // TBD
 void crawlGait (void);          // TBD
 void walkGait (void);           // TBD
@@ -128,10 +128,101 @@ void moveServos (void) {
 
 void moveFoot (void) {
     Serial.println("moveFoot");
+    double x;
+    double y;
+
+    for (uint8_t i = 0; i < 2; i++) {
+        // Horizontal movement
+        y = -60;
+        for (x = 20; x <= 60; x++) {
+            frLeg.moveFoot(&pwm, x, y);
+            delay(20);
+        }
+        for (x = 60; x >= 0; x--) {
+            frLeg.moveFoot(&pwm, x, y);
+            delay(20);
+        }
+        for (x = 0; x <= 20; x++) {
+            frLeg.moveFoot(&pwm, x, y);
+            delay(20);
+        }
+
+        // Vertical movement
+        x = 20;
+        for (y = -60; y >= -85; y--) {
+            frLeg.moveFoot(&pwm, x, y);
+            delay(20);
+        }
+        for (y = -85; y <= -25; y++) {
+            frLeg.moveFoot(&pwm, x, y);
+            delay(20);
+        }
+        for (y = -25; y >= -60; y--) {
+            frLeg.moveFoot(&pwm, x, y);
+            delay(20);
+        }
+    }
+    frLeg.homeLeg(&pwm);
 }
 
 void squareTrajectory (void) {
     Serial.println("squareTrajectory");
+    double x;
+    double y;
+
+    double points [9][2] = {
+        { -10, -50},
+        { 50, -50},
+        { 50, -80},
+        { -10, -80},
+        { -10, -50},
+        { 50, -50},
+        { 50, -80},
+        { -10, -80},
+        {TIBIA_LENGTH, -FEMUR_LENGTH}
+    };
+
+    x = TIBIA_LENGTH;
+    y = -FEMUR_LENGTH;
+
+    for (uint8_t i = 0; i < 9; i++) {
+        double targetX = points[i][0];
+        double targetY = points[i][1];
+        /*
+            Serial.print("Target x = ");
+            Serial.println(targetX);
+            Serial.print("Target y = ");
+            Serial.println(targetY);
+        */
+
+        while (x != targetX || y != targetY) {
+            // Update x
+            if (x > targetX) {
+                x--;
+            } else if (x < targetX) {
+                x++;
+            }
+
+            // Update y
+            if (y > targetY) {
+                y--;
+            } else if (y < targetY) {
+                y++;
+            }
+
+            // Move foot
+            frLeg.moveFoot(&pwm, x, y);
+            /*
+                Serial.print(x);
+                Serial.print(", ");
+                Serial.println(y);
+            */
+            delay(20);
+        }
+
+    }
+
+
 }
 
 void bezierTrajectory (void) {

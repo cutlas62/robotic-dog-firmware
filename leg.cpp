@@ -1,7 +1,5 @@
 #include "leg.h"
 
-
-
 const uint8_t servoNumbers [4][2] = {{9, 8}, {14, 15}, {6, 7}, {1, 0}};
 
 
