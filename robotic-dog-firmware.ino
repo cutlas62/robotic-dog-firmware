@@ -18,12 +18,15 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 void moveServos (void);
 void moveFoot (void);
 void squareTrajectory (void);
-void bezierTrajectory (void);   // TBD
+void bezierTrajectory (void);
 void crawlGait (void);          // TBD
 void walkGait (void);           // TBD
 void runGait (void);            // TBD
 
 void printHelp (void);
+void homeAllServos (void);
+uint32_t fac (uint32_t n);              // Factorial of a number
+uint32_t bin (uint32_t n, uint32_t i);  // Newton's binomium
 
 /****************************************
     Commands
@@ -41,6 +44,7 @@ Cmd cmdMatrix [] {
     {"6\0", walkGait},
     {"7\0", runGait},
     {"help\0", printHelp},
+    {"home\0", homeAllServos},
 };
 
 uint8_t nCmd = sizeof(cmdMatrix) / sizeof(Cmd);
@@ -223,6 +227,82 @@ void squareTrajectory (void) {
 
 void bezierTrajectory (void) {
     Serial.println(F("bezierTrajectory"));
+    double x;
+    double y;
+
+    double points [][2] = {
+        {20, -45},
+        {80, -2},
+        {80, -100},
+        { -40, -100},
+        { -40, -60},
+        {20, -45},
+    };
+
+    // Slowly go back to first position
+    x = TIBIA_LENGTH;
+    y = -FEMUR_LENGTH;
+    while (x != points[0][0] || y != points[0][1]) {
+        // Update x
+        if (x > points[0][0]) {
+            x--;
+        } else if (x < points[0][0]) {
+            x++;
+        }
+
+        // Update y
+        if (y > points[0][1]) {
+            y--;
+        } else if (y < points[0][1]) {
+            y++;
+        }
+
+        // Move foot
+        frLeg.moveFoot(&pwm, x, y);
+        delay(15);
+    }
+
+    // Actual Bezier curve
+    uint8_t nPoints = sizeof(points) / sizeof(points[0]);
+    double n = nPoints - 1;
+    for (uint8_t j = 0; j < 3; j++) {
+        for (double t = 0; t <= 1; t += 0.005) {
+            x = 0;
+            y = 0;
+
+            for (uint8_t i = 0; i < nPoints; i++) {
+                x += bin(n, i) * pow(1 - t, n - i) * pow(t, i) * points[i][0];
+                y += bin(n, i) * pow(1 - t, n - i) * pow(t, i) * points[i][1];
+            }
+
+            frLeg.moveFoot(&pwm, x, y);
+            delay(5);
+        }
+    }
+
+    // Slowly go back to home position
+    x = points[0][0];
+    y = points[0][1];
+    while (x != TIBIA_LENGTH || y != -FEMUR_LENGTH) {
+        // Update x
+        if (x > TIBIA_LENGTH) {
+            x--;
+        } else if (x < TIBIA_LENGTH) {
+            x++;
+        }
+
+        // Update y
+        if (y > -FEMUR_LENGTH) {
+            y--;
+        } else if (y < -FEMUR_LENGTH) {
+            y++;
+        }
+
+        // Move foot
+        frLeg.moveFoot(&pwm, x, y);
+        delay(15);
+    }
+    frLeg.moveFoot(&pwm, TIBIA_LENGTH, -FEMUR_LENGTH);
 }
 
 void crawlGait (void) {
@@ -303,14 +383,6 @@ int decodeInputCmd (int argc, char* argv []) {
     }
 }
 
-void homeAllServos() {
-    Serial.println(F("Homing all the servos..."));
-    frLeg.homeLeg(&pwm);
-    flLeg.homeLeg(&pwm);
-    rrLeg.homeLeg(&pwm);
-    rlLeg.homeLeg(&pwm);
-}
-
 void printHelp (void) {
     Serial.println(F("******************"));
     Serial.println(F("*  1 - moveServos"));
@@ -321,5 +393,28 @@ void printHelp (void) {
     Serial.println(F("*  6 - walkGait"));
     Serial.println(F("*  7 - runGait"));
     Serial.println(F("******************"));
+}
 
+/****************************************
+    Helper functions
+ ****************************************/
+void homeAllServos() {
+    Serial.println(F("Homing all the servos..."));
+    frLeg.homeLeg(&pwm);
+    flLeg.homeLeg(&pwm);
+    rrLeg.homeLeg(&pwm);
+    rlLeg.homeLeg(&pwm);
+}
+
+uint32_t fac (uint32_t n) {
+    uint32_t ret = 1;
+    while (n > 0) {
+        ret *= n;
+        n--;
+    }
+    return ret;
+}
+
+uint32_t bin (uint32_t n, uint32_t i) {
+    return (fac(n) / (fac(i) * fac(n - i)));
 }
