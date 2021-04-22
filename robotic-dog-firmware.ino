@@ -25,42 +25,32 @@ void setup() {
     Serial.println("Starting now");
 }
 
+double points [][2] = {
+    {TIBIA_LENGTH, -FEMUR_LENGTH},
+    {TIBIA_LENGTH, 0},
+    {TIBIA_LENGTH, -FEMUR_LENGTH},
+    {TIBIA_LENGTH, -FEMUR_LENGTH - 20},
+};
+uint8_t nPoints = sizeof(points) / sizeof(points[0]);
 
 void loop() {
-
     checkSerialPort();
-    double x = 0;
-    double y = 0;
-    unsigned long start_t = 0;
-    unsigned long end_t = 0;
-    if (shouldMove) {
-        for (y = -30; y >= -90; y -= 0.5) {
-            start_t = micros();
-            frLeg.moveFoot(&pwm, x, y);
-            flLeg.moveFoot(&pwm, x, y);
-            rrLeg.moveFoot(&pwm, x, y);
-            rlLeg.moveFoot(&pwm, x, y);
-            end_t = micros();
-            Serial.println(end_t - start_t);
-            //delay(8);
-        }
+    uint8_t i = 0;
+
+    while (shouldMove) {
+        checkSerialPort();
+
+        frLeg.setTargetCoor(points[i][0], points[i][1]);
+        frLeg.setStepSize(1);
+
+        uint8_t r;
+        do {
+            r = frLeg.update(&pwm);
+            delay(25);
+        } while (r != 0);
+
+        i = (i + 1) % nPoints;
     }
-
-    checkSerialPort();
-
-    if (shouldMove) {
-        for (y = -90; y <= -30; y += 0.5) {
-            start_t = micros();
-            frLeg.moveFoot(&pwm, x, y);
-            flLeg.moveFoot(&pwm, x, y);
-            rrLeg.moveFoot(&pwm, x, y);
-            rlLeg.moveFoot(&pwm, x, y);
-            end_t = micros();
-            Serial.println(end_t - start_t);
-            //delay(8);
-        }
-    }
-
 }
 
 void checkSerialPort(void) {
