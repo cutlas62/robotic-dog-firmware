@@ -59,9 +59,6 @@ class Leg {
         void setStepSize (double s);
 
         void moveFoot (Adafruit_PWMServoDriver *pwm, double x, double y);
-        //void fakeMoveFoot (double xCoor, double yCoor);
-
-        
         uint8_t update (Adafruit_PWMServoDriver *pwm);
 
         void homeLeg (Adafruit_PWMServoDriver *pwm);
