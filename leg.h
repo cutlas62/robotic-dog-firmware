@@ -26,6 +26,9 @@ class Leg {
         // All dimensions are in mm
         double footX;
         double footY;
+        double targetX;
+        double targetY;
+        double stepSize;
         enum legPosition legPos;
         uint8_t hipServoN;
         uint8_t kneeServoN;
@@ -52,9 +55,11 @@ class Leg {
         void setHipOffset(int offset);
         int getKneeOffset (void);
         void setKneeOffset(int offset);
+        void setTargetCoor (double x, double y);
+        void setStepSize (double s);
 
         void moveFoot (Adafruit_PWMServoDriver *pwm, double x, double y);
-        //void fakeMoveFoot (double xCoor, double yCoor);
+        uint8_t update (Adafruit_PWMServoDriver *pwm);
 
         void homeLeg (Adafruit_PWMServoDriver *pwm);
 };

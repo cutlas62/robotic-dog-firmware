@@ -64,6 +64,13 @@ void setup() {
     printHelp();
 }
 
+double points [][2] = {
+    {TIBIA_LENGTH, -FEMUR_LENGTH},
+    {TIBIA_LENGTH, 0},
+    {TIBIA_LENGTH, -FEMUR_LENGTH},
+    {TIBIA_LENGTH, -FEMUR_LENGTH - 20},
+};
+uint8_t nPoints = sizeof(points) / sizeof(points[0]);
 
 /****************************************
     Loop

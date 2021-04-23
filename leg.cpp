@@ -2,13 +2,15 @@
 
 const uint8_t servoNumbers [4][2] = {{9, 8}, {14, 15}, {6, 7}, {1, 0}};
 
-
 /*******************************************
     Constructors
  ******************************************/
 Leg::Leg (enum legPosition pos, int hipOff, int kneeOff) {
-    footX = 0;
-    footY = 0;
+    footX = TIBIA_LENGTH;
+    footY = -FEMUR_LENGTH;
+    targetX = TIBIA_LENGTH;
+    targetY = -FEMUR_LENGTH;
+    stepSize = 1;
     legPos = pos;
     hipServoN = servoNumbers[pos][0];
     kneeServoN = servoNumbers[pos][1];
@@ -32,7 +34,6 @@ Leg::Leg (double x, double y, enum legPosition pos, int hipOff, int kneeOff) {
 }
 
 
-
 /*******************************************
     Setters and Getters
  ******************************************/
@@ -52,13 +53,53 @@ void Leg::setKneeOffset(int offset) {
     kneeOffset = offset;
 }
 
+void Leg::setTargetCoor(double x, double y) {
+    targetX = x;
+    targetY = y;
+}
+
+void Leg::setStepSize(double s) {
+    stepSize = s;
+}
 
 
 /*******************************************
     Actuator Functions
  ******************************************/
+uint8_t Leg::update (Adafruit_PWMServoDriver *pwm) {
+    double diff;
+    uint8_t ret = 0;
+
+    // Check for x
+    diff = footX - targetX;
+    if (diff > 0) {
+        footX -= (diff > stepSize) ? stepSize : diff;
+        ret |= 0x01;
+    } else if (diff < 0) {
+        footX += (abs(diff) > stepSize) ? stepSize : abs(diff);
+        ret |= 0x02;
+    }
+
+    // Check for y
+    diff = footY - targetY;
+    if (diff > 0) {
+        footY -= (diff > stepSize) ? stepSize : diff;
+        ret |= 0x04;
+    } else if (diff < 0) {
+        footY += (abs(diff) > stepSize) ? stepSize : abs(diff);
+        ret |= 0x08;
+    }
+
+    // Move the foot to the next position
+    if (ret != 0) {
+        moveFoot(pwm, footX, footY);
+    }
+    return ret;
+}
+
+
 void Leg::moveFoot (Adafruit_PWMServoDriver *pwm, double x, double y) {
-    double q2 = acos((x*x + y*y - diff_femur_tibia) / q2_den);
+    double q2 = acos((x * x + y * y - diff_femur_tibia) / q2_den);
     double q1 = atan2(y, x) - atan2((TIBIA_LENGTH * sin(q2)), (FEMUR_LENGTH + TIBIA_LENGTH * cos(q2)));
 
     if (isnan(q1) || isnan(q2)) {
@@ -79,47 +120,8 @@ void Leg::moveFoot (Adafruit_PWMServoDriver *pwm, double x, double y) {
 
     pwm->setPWM(hipServoN, 0, _q1);
     pwm->setPWM(kneeServoN, 0, _q2);
-
-    footX = x;
-    footY = y;
-
 }
 
-// Same as moveFoot but just print the joint values
-// instead of moving the feet, for testing purposes
-/*
-void Leg::fakeMoveFoot (double x, double y) {
-    double a = femurLength;
-    double b = tibiaLength;
-    double q2 = acos((x * x + y * y - a * a - b * b) / (2 * a * b));
-    double q1 = atan2(y, x) - atan2((b * sin(q2)), (a + b * cos(q2)));
-    Serial.print(F("[x,y,q1,q2] = ["));
-    Serial.print(x);
-    Serial.print(F(","));
-    Serial.print(y);
-    Serial.print(F(","));
-    Serial.print(q1);
-    Serial.print(F(","));
-    Serial.print(q2);
-    Serial.println(F("]"));
-
-    if (isnan(q1) || isnan(q2)) {
-        return;
-    }
-
-    uint16_t _q1 = constrainServoPoints(radToServoPoints(q1, -PI, 0, 217, 534));
-    uint16_t _q2 = constrainServoPoints(radToServoPoints(PI - q2, 0, PI, 217, 534));
-    _q1 += hipOffset;
-    _q2 += kneeOffset;
-    Serial.print(F("_q1 = "));
-    Serial.print(_q1);
-    Serial.print(F(", _q2 = "));
-    Serial.println(_q2);
-
-    footX = x;
-    footY = y;
-}
-*/
 
 void Leg::homeLeg (Adafruit_PWMServoDriver *pwm) {
     pwm->setPWM(hipServoN, 0, SERVO_HOME + hipOffset);
