@@ -19,7 +19,7 @@ void moveServos (void);
 void moveFoot (void);
 void squareTrajectory (void);
 void bezierTrajectory (void);
-void crawlGait (void);          // TBD
+void crawlGait (void);
 void walkGait (void);           // TBD
 void runGait (void);            // TBD
 
@@ -63,14 +63,6 @@ void setup() {
     Serial.println(F("Starting now"));
     printHelp();
 }
-
-double points [][2] = {
-    {TIBIA_LENGTH, -FEMUR_LENGTH},
-    {TIBIA_LENGTH, 0},
-    {TIBIA_LENGTH, -FEMUR_LENGTH},
-    {TIBIA_LENGTH, -FEMUR_LENGTH - 20},
-};
-uint8_t nPoints = sizeof(points) / sizeof(points[0]);
 
 /****************************************
     Loop
@@ -314,6 +306,209 @@ void bezierTrajectory (void) {
 
 void crawlGait (void) {
     Serial.println(F("crawlGait"));
+
+    uint8_t delayms = 12;
+    double points [][2] = {
+        { 20, -70},
+        { 5, -70},
+        { -10, -70},
+        { -25, -70},
+        { -40, -70},
+    };
+    uint8_t nPoints = sizeof(points) / sizeof(points[0]);
+    double highPoint [][2] = {
+        { -30, -60},
+        { 10, -60}
+    };
+
+    typedef enum states {
+        setInitPositions,
+        advanceFL,
+        advanceFR,
+        advanceRL,
+        advanceRR,
+        moveAllLegs,
+    } states_t;
+    states_t curState = setInitPositions;
+    states_t nextState = setInitPositions;
+
+    uint8_t flIndex, frIndex, rlIndex, rrIndex;
+    uint8_t ret;
+
+    uint8_t nIterations = 20;
+    while (nIterations > 0) {
+        switch (curState) {
+            case setInitPositions:
+                flIndex = 0;
+                frIndex = 2;
+                rlIndex = 1;
+                rrIndex = 3;
+
+                // Set initial coordinates
+                flLeg.setTargetCoor(points[flIndex][0], points[flIndex][1]);
+                frLeg.setTargetCoor(points[frIndex][0], points[frIndex][1]);
+                rlLeg.setTargetCoor(points[rlIndex][0], points[rlIndex][1]);
+                rrLeg.setTargetCoor(points[rrIndex][0], points[rrIndex][1]);
+
+                // Move the legs
+                do {
+                    ret = flLeg.update(&pwm);
+                    ret += frLeg.update(&pwm);
+                    ret += rlLeg.update(&pwm);
+                    ret += rrLeg.update(&pwm);
+                    delay(delayms);
+                } while (ret != 0);
+
+                nextState = moveAllLegs;
+                break;
+
+            case advanceFL:
+                flLeg.setTargetCoor(highPoint[0][0], highPoint[0][1]);
+                do {
+                    ret = flLeg.update(&pwm);
+                    delay(delayms);
+                } while (ret != 0);
+
+                flLeg.setTargetCoor(highPoint[1][0], highPoint[1][1]);
+                do {
+                    ret = flLeg.update(&pwm);
+                    delay(delayms);
+                } while (ret != 0);
+
+
+
+
+                flIndex = 0;
+                flLeg.setTargetCoor(points[flIndex][0], points[flIndex][1]);
+                do {
+                    ret = flLeg.update(&pwm);
+                    delay(delayms);
+                } while (ret != 0);
+
+                nextState = moveAllLegs;
+
+                break;
+
+            case advanceFR:
+                frLeg.setTargetCoor(highPoint[0][0], highPoint[0][1]);
+                do {
+                    ret = frLeg.update(&pwm);
+                    delay(delayms);
+                } while (ret != 0);
+
+                frLeg.setTargetCoor(highPoint[1][0], highPoint[1][1]);
+                do {
+                    ret = frLeg.update(&pwm);
+                    delay(delayms);
+                } while (ret != 0);
+
+                frIndex = 0;
+                frLeg.setTargetCoor(points[frIndex][0], points[frIndex][1]);
+                do {
+                    ret = frLeg.update(&pwm);
+                    delay(delayms);
+                } while (ret != 0);
+
+                nextState = moveAllLegs;
+
+                break;
+
+            case advanceRL:
+                rlLeg.setTargetCoor(highPoint[0][0], highPoint[0][1]);
+                do {
+                    ret = rlLeg.update(&pwm);
+                    delay(delayms);
+                } while (ret != 0);
+
+                rlLeg.setTargetCoor(highPoint[1][0], highPoint[1][1]);
+                do {
+                    ret = rlLeg.update(&pwm);
+                    delay(delayms);
+                } while (ret != 0);
+
+                rlIndex = 0;
+                rlLeg.setTargetCoor(points[rlIndex][0], points[rlIndex][1]);
+                do {
+                    ret = rlLeg.update(&pwm);
+                    delay(delayms);
+                } while (ret != 0);
+
+                nextState = moveAllLegs;
+
+                break;
+
+            case advanceRR:
+                rrLeg.setTargetCoor(highPoint[0][0], highPoint[0][1]);
+                do {
+                    ret = rrLeg.update(&pwm);
+                    delay(delayms);
+                } while (ret != 0);
+
+                rrLeg.setTargetCoor(highPoint[1][0], highPoint[1][1]);
+                do {
+                    ret = rrLeg.update(&pwm);
+                    delay(delayms);
+                } while (ret != 0);
+
+                rrIndex = 0;
+                rrLeg.setTargetCoor(points[rrIndex][0], points[rrIndex][1]);
+                do {
+                    ret = rrLeg.update(&pwm);
+                    delay(delayms);
+                } while (ret != 0);
+
+                nextState = moveAllLegs;
+
+                break;
+
+            case moveAllLegs:
+                // Update the indices
+                flIndex = (flIndex + 1) % nPoints;
+                frIndex = (frIndex + 1) % nPoints;
+                rlIndex = (rlIndex + 1) % nPoints;
+                rrIndex = (rrIndex + 1) % nPoints;
+
+                // Set new target coordinates
+                flLeg.setTargetCoor(points[flIndex][0], points[flIndex][1]);
+                frLeg.setTargetCoor(points[frIndex][0], points[frIndex][1]);
+                rlLeg.setTargetCoor(points[rlIndex][0], points[rlIndex][1]);
+                rrLeg.setTargetCoor(points[rrIndex][0], points[rrIndex][1]);
+
+                // Move the legs
+                do {
+                    ret = flLeg.update(&pwm);
+                    ret += frLeg.update(&pwm);
+                    ret += rlLeg.update(&pwm);
+                    ret += rrLeg.update(&pwm);
+                    delay(delayms);
+                } while (ret != 0);
+
+                // The leg that is further behind should be moved forward
+                uint8_t maxIndex = flIndex;
+                nextState = advanceFL;
+                if (frIndex > maxIndex) {
+                    maxIndex = frIndex;
+                    nextState = advanceFR;
+                }
+                if (rlIndex > maxIndex) {
+                    maxIndex = rlIndex;
+                    nextState = advanceRL;
+                }
+                if (rrIndex > maxIndex) {
+                    maxIndex = rrIndex;
+                    nextState = advanceRR;
+                }
+                break;
+
+            default:
+                Serial.print(F("Bad state: "));
+                Serial.println(curState);
+        }
+
+        curState = nextState;
+        nIterations--;
+    }
+    homeAllServos();
 }
 
 void walkGait (void) {
@@ -407,10 +602,20 @@ void printHelp (void) {
  ****************************************/
 void homeAllServos() {
     Serial.println(F("Homing all the servos..."));
-    frLeg.homeLeg(&pwm);
-    flLeg.homeLeg(&pwm);
-    rrLeg.homeLeg(&pwm);
-    rlLeg.homeLeg(&pwm);
+
+    flLeg.setTargetCoor(TIBIA_LENGTH, -FEMUR_LENGTH);
+    frLeg.setTargetCoor(TIBIA_LENGTH, -FEMUR_LENGTH);
+    rlLeg.setTargetCoor(TIBIA_LENGTH, -FEMUR_LENGTH);
+    rrLeg.setTargetCoor(TIBIA_LENGTH, -FEMUR_LENGTH);
+
+    uint8_t ret;
+    do {
+        ret = flLeg.update(&pwm);
+        ret += frLeg.update(&pwm);
+        ret += rlLeg.update(&pwm);
+        ret += rrLeg.update(&pwm);
+        delay(25);
+    } while (ret != 0);
 }
 
 uint32_t fac (uint32_t n) {
