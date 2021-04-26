@@ -20,7 +20,7 @@ void moveFoot (void);
 void squareTrajectory (void);
 void bezierTrajectory (void);
 void crawlGait (void);
-void walkGait (void);           // TBD
+void walkGait (void);
 void runGait (void);            // TBD
 
 void printHelp (void);
@@ -218,10 +218,7 @@ void squareTrajectory (void) {
             frLeg.moveFoot(&pwm, x, y);
             delay(20);
         }
-
     }
-
-
 }
 
 void bezierTrajectory (void) {
@@ -231,7 +228,7 @@ void bezierTrajectory (void) {
 
     double points [][2] = {
         {20, -45},
-        {80, -2},
+        {80, -20},
         {80, -100},
         { -40, -100},
         { -40, -60},
@@ -513,6 +510,54 @@ void crawlGait (void) {
 
 void walkGait (void) {
     Serial.println(F("walkGait"));
+    double x;
+    double y;
+
+    double points [][2] = {
+        {0, -65},
+        {60, -40},
+        {60, -100},
+        { -60, -100},
+        { -60, -80},
+        {0, -65},
+    };
+    uint8_t nPoints = sizeof(points) / sizeof(points[0]);
+
+    double n = nPoints - 1;
+    for (uint8_t j = 0; j < 5; j++) {
+        for (double t = 0; t <= 1; t += 0.01) {
+            x = 0;
+            y = 0;
+            // Coordinates for the right side
+            for (uint8_t i = 0; i < nPoints; i++) {
+                x += bin(n, i) * pow(1 - t, n - i) * pow(t, i) * points[i][0];
+                y += bin(n, i) * pow(1 - t, n - i) * pow(t, i) * points[i][1];
+            }
+            frLeg.setTargetCoor(x, y);
+            rrLeg.setTargetCoor(x, y);
+
+            // Coordinates for the left side
+            x = 0;
+            y = 0;
+            double _t = (t > 0.5) ? t - 0.5 : t + 0.5;
+            for (uint8_t i = 0; i < nPoints; i++) {
+                x += bin(n, i) * pow(1 - _t, n - i) * pow(_t, i) * points[i][0];
+                y += bin(n, i) * pow(1 - _t, n - i) * pow(_t, i) * points[i][1];
+            }
+            flLeg.setTargetCoor(x, y);
+            rlLeg.setTargetCoor(x, y);
+
+            //Update all the legs
+            uint8_t ret = 0;
+            do {
+                ret = frLeg.update(&pwm);
+                ret += flLeg.update(&pwm);
+                ret += rrLeg.update(&pwm);
+                ret += rlLeg.update(&pwm);
+            } while (ret != 0);
+        }
+    }
+    homeAllServos();
 }
 
 void runGait (void) {
@@ -614,7 +659,7 @@ void homeAllServos() {
         ret += frLeg.update(&pwm);
         ret += rlLeg.update(&pwm);
         ret += rrLeg.update(&pwm);
-        delay(25);
+        delay(10);
     } while (ret != 0);
 }
 
