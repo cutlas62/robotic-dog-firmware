@@ -21,7 +21,7 @@ void squareTrajectory (void);
 void bezierTrajectory (void);
 void crawlGait (void);
 void walkGait (void);
-void runGait (void);            // TBD
+void runGait (void);
 
 void printHelp (void);
 void homeAllServos (void);
@@ -31,7 +31,7 @@ uint32_t bin (uint32_t n, uint32_t i);  // Newton's binomium
 /****************************************
     Commands
  ****************************************/
-typedef struct Cmd {
+struct Cmd {
     char cmd[5];
     void (*funcptr)(void);
 };
@@ -60,7 +60,7 @@ void setup() {
     pwm.begin();
     pwm.setPWMFreq(60);
 
-    Serial.println(F("Starting now"));
+    Serial.println(F("/nStarting now"));
     printHelp();
 }
 
@@ -562,6 +562,64 @@ void walkGait (void) {
 
 void runGait (void) {
     Serial.println(F("runGait"));
+    double x;
+    double y;
+
+    double points [][2] = {
+        {0, -60},
+        {80, -50},
+        {80, -90},
+        { -80, -90},
+        { -80, -70},
+        {0, -60},
+    };
+    uint8_t nPoints = sizeof(points) / sizeof(points[0]);
+    uint8_t n = nPoints - 1;
+
+    uint8_t bezierNPoints = 100;
+    double bezierPoints [bezierNPoints][2];
+    double bezierStep = 1.0 / bezierNPoints;
+
+    // Populate the bezier points array
+    uint8_t i = 0;
+    for (double t = 0; (t < 1) && (i < bezierNPoints); t += bezierStep) {
+        x = 0;
+        y = 0;
+        for (uint8_t j = 0; j < nPoints; j++) {
+            x += bin(n, j) * pow(1 - t, n - j) * pow(t, j) * points[j][0];
+            y += bin(n, j) * pow(1 - t, n - j) * pow(t, j) * points[j][1];
+        }
+        bezierPoints[i][0] = x;
+        bezierPoints[i][1] = y;
+        i++;
+    }
+
+    // Move the legs
+    uint8_t frOffset = bezierNPoints * 0.15;
+    uint8_t rlOffset = bezierNPoints * 0.65;
+    uint8_t rrOffset = bezierNPoints * 0.80;
+
+    for (i = 0; i < 5; i++) {
+        for (uint8_t j = 0; j < bezierNPoints; j++) {
+
+            // Set feet coordinates
+            flLeg.setTargetCoor(bezierPoints[j][0], bezierPoints[j][1]);
+            frLeg.setTargetCoor(bezierPoints[(j + frOffset) % bezierNPoints][0], bezierPoints[(j + frOffset) % bezierNPoints][1]);
+            rlLeg.setTargetCoor(bezierPoints[(j + rlOffset) % bezierNPoints][0], bezierPoints[(j + rlOffset) % bezierNPoints][1]);
+            rrLeg.setTargetCoor(bezierPoints[(j + rrOffset) % bezierNPoints][0], bezierPoints[(j + rrOffset) % bezierNPoints][1]);
+
+            // Move the legs
+            uint8_t ret = 0;
+            do {
+                ret = frLeg.update(&pwm);
+                ret += flLeg.update(&pwm);
+                ret += rrLeg.update(&pwm);
+                ret += rlLeg.update(&pwm);
+                //delay(5);
+            } while (ret != 0);
+        }
+    }
+    homeAllServos();
 }
 
 
@@ -628,6 +686,7 @@ int decodeInputCmd (int argc, char* argv []) {
     if (i == nCmd) {
         Serial.println(F("Command not found"));
     }
+    return 0;
 }
 
 void printHelp (void) {
